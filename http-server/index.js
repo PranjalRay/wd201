@@ -1,70 +1,59 @@
-const http = require("http");
-const fs = require("fs");
-const argv=require("minimist")(process.argv.slice(2));
-let homeC = "";
-let projectC = "";
-let registrationC = "";
-let cssC = "";
-let jsC = "";
-fs.readFile("registration.html", (er, registration) => {
-  if (er) {
-    throw er;
+let NewForm=document.getElementById("registrationForm");
+const DOB=document.getElementById("dob");
+const DateToday=new Date().toISOString().slice(4, 10);
+const CurrentYear=new Date().getFullYear();
+DOB.min=`${CurrentYear-55}${DateToday}`;
+DOB.max=`${CurrentYear-18}${DateToday}`;
+const GetEntries = () => {
+  let InputData=localStorage.getItem("history");
+  if (InputData) {
+    InputData=JSON.parse(InputData);
+  } else {
+    InputData=[];
   }
-  registrationC = registration;
-});
-fs.readFile("home.html", (er, home) => {
-  if (er) {
-    throw er;
-  }
-  homeC = home;
-});
-fs.readFile("project.html", (er, project) => {
-  if (er) {
-    throw er;
-  }
-  projectC = project;
-});
-fs.readFile("index1.css", (er, css) => {
-  if (er) {
-    throw er;
-  }
-  cssC = css;
-});
-fs.readFile("index1.js", (er, js) => {
-  if (er) {
-    throw er;
-  }
-  jsC = js;
-});
-const port= argv.port||5000;
-http
-  .createServer((request, response) => {
-    let ur = request.url;
-    if (ur === "/index1.css") {
-      response.writeHead(200, { "Content-Type": "text/css" });
-      response.write(cssC);
-      response.end();
-      return;
-    } else if (ur === "/index1.js") {
-      response.writeHead(200, { "Content-Type": "text/javascript" });
-      response.write(jsC);
-      response.end();
-      return;
-    }
-    response.writeHead(200, { "Content-Type": "text/html" });
-    switch (ur) {
-      case "/registration":
-        response.write(registrationC);
-        break;
-      case "/project":
-        response.write(projectC);
-        break;
-      default:
-        response.write(homeC);
-        break;
-    }
-    response.end();
-  })
-  .listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-  });
+  return InputData;
+};
+let InputEntries = GetEntries();
+const DisplayEntries = () => {
+  const InputData = GetEntries();
+  const TableEntries = InputData
+    .map((e) => {
+      const NameCell=`<td>${e.name}</td>`;
+      const EmailCell=`<td>${e.email}</td>`;
+      const PasswordCell=`<td>${e.password}</td>`;
+      const DobCell=`<td>${e.dob}</td>`;
+      const AcceptTermsCell=`<td>${e.acceptTerms}</td>`;
+      const row=`<tr>${NameCell}${EmailCell}${PasswordCell}${DobCell}${AcceptTermsCell}</tr>`;
+      return row;
+    })
+    .join("\n");
+  const Table = `<table border = 11><tr>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Password</th>
+    <th>Dob</th>
+    <th>Accepted terms?</th>
+    </tr>${TableEntries} </table>`;
+  let Detail=document.getElementById("history");
+  Detail.innerHTML = Table;
+};
+const SaveInputForm = (event) => {
+  event.preventDefault();
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const dob = document.getElementById("dob").value;
+  const acceptTerms = document.getElementById("acceptTerms").checked;
+  const InputData = {
+    name,
+    email,
+    password,
+    dob,
+    acceptTerms,
+  };                                                                                                  
+  InputEntries.push(InputData);
+  localStorage.setItem("history",JSON.stringify(InputEntries));
+  DisplayEntries();
+};
+NewForm.addEventListener("submit",SaveInputForm);
+DisplayEntries();
