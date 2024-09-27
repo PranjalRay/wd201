@@ -1,35 +1,40 @@
 const todoList = () => {
   let all = [];
+
   const add = (todoItem) => {
     all.push(todoItem);
   };
+
   const markAsComplete = (index) => {
     all[index].completed = true;
   };
+
   const formattedDate = (d) => {
     return d.toISOString().split("T")[0];
   };
+
   const overdue = () => {
     const today = formattedDate(new Date());
-    return all.filter((item) =>!item.completed && item.dueDate < today);
+    return all.filter((item) => item.dueDate < today); 
   };
+
   const dueToday = () => {
     const today = formattedDate(new Date());
-    return all.filter((item) =>!item.completed && item.dueDate === today);
-  }
+    return all.filter((item) => item.dueDate === today); 
+  };
 
   const dueLater = () => {
     const today = formattedDate(new Date());
-    return all.filter((item) =>!item.completed && item.dueDate > today);
-  }
+    return all.filter((item) => item.dueDate > today); 
+  };
 
   const toDisplayableList = (list) => {
     const today = formattedDate(new Date());
     return list
-      .map((item,index) =>
-          `${item.completed ? "[x]" : "[ ]"} ${item.title}${
-            item.dueDate === today ? "" : " " + item.dueDate
-          }`.trim()
+      .map((item) =>
+        `${item.completed ? "[x]" : "[ ]"} ${item.title}${
+          item.dueDate === today ? "" : " " + item.dueDate
+        }`.trim()
       )
       .join("\n");
   };
